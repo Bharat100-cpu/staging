@@ -3,9 +3,11 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
     if(Trigger.isBefore) {
         if(Trigger.isInsert) {
             OpportunityTriggerHandler.setPriorityOnOppInsertAndUpdate(Trigger.new);
+            OpportunityTriggerHandler.createTaskOnOpportunityAmountChange(Trigger.new, Trigger.oldMap);
         }
         if(Trigger.isUpdate) {
             OpportunityTriggerHandler.setPriorityOnOppInsertAndUpdate(Trigger.new);
+            OpportunityTriggerHandler.createTaskOnOpportunityAmountChange(Trigger.new, Trigger.oldMap);
         }
     }
 }
