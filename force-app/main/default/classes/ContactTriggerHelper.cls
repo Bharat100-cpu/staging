@@ -74,4 +74,56 @@ public with sharing class ContactTriggerHelper {
             }
         }
     }
+
+    public static void calculateHealthScore(List<Contact> newContacts, Map<Id, Contact> oldContacts) {
+
+        Set<Id> accountIds = new Set<Id>();
+        if (oldContacts != null) {
+            for (Contact con : oldContacts.values()) {
+                accountIds.add(con.AccountId);
+            }
+        }
+        for (Contact con : newContacts) {
+            accountIds.add(con.AccountId);
+        }
+
+        List<Account> relatedAccounts = [SELECT Id, Name, Number_of_Contacts__c, Health_Score__c FROM Account WHERE Id IN : accountIds];
+
+        Map<Id, Account> accountsMap = new Map<Id, Account>();
+        if (relatedAccounts != null) {
+            for (Account acc : relatedAccounts) {
+               if (!accountsMap.containsKey(acc.Id)) {
+                    accountsMap.put(acc.Id, acc);
+               }
+            }
+        }
+
+        List<AggregateResult> results = [SELECT AccountId, COUNT(Id) contacts FROM Contact WHERE AccountId IN : accountIds GROUP BY AccountId];
+        List<Account> accountsToUpdate = new List<Account>();
+
+        for (AggregateResult ar : results) {
+            if (accountsMap != null) {
+                Id accountId = (String)ar.get('AccountId');
+                if (accountsMap.containsKey(accountId)) {
+                    Account relatedAccount = accountsMap.get(accountId);
+                    Integer totalContacts = (Integer)ar.get('contacts');
+                    if(totalContacts != relatedAccount.Number_of_Contacts__c) {
+                        if (totalContacts > 10) {
+                            relatedAccount.Health_Score__c = 'High';
+                        } else if(totalContacts > 5 && totalContacts <= 10) {
+                            relatedAccount.Health_Score__c = 'Medium';
+                        } else if(totalContacts <= 5) {
+                            relatedAccount.Health_Score__c = 'Low';
+                        }
+                    }
+                    relatedAccount.Number_of_Contacts__c = totalContacts;
+                    accountsToUpdate.add(relatedAccount);
+                }
+            }
+        }
+
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate;
+        }
+    }
 }
