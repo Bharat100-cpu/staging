@@ -37,4 +37,23 @@ public with sharing class OpportunityTriggerHandler {
             insert tasksToInsert;
         }
     }
+
+    public static void closeDateValidationAndProbabilityPrediction(List<Opportunity> newOpportunities) {
+
+        Date today = Date.today();
+        Map<String, Integer> stageProbabilityMap = new Map<String, Integer>{
+            'Prospecting' => 10,
+            'Negotiation/Review' => 75
+        };
+
+        for (Opportunity opp : newOpportunities) {
+            if (opp.CloseDate < today) {
+                opp.CloseDate.addError('Date cannot be in the past.');
+            }
+
+            if (String.isNotBlank(opp.StageName) && stageProbabilityMap.containsKey(opp.StageName)) {
+                opp.Probability = stageProbabilityMap.get(opp.StageName);
+            }
+        }
+    }
 }
