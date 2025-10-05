@@ -34,8 +34,28 @@ public with sharing class AccountTriggerHelper {
             try {
                 insert contactsToInsert;
             } catch (Exception e) {
+                System.debug('message : ' + e.getMessage());
                 throw new AuraHandledException(e.getMessage());
             }
+        }
+    }
+
+    public static void insertTask(List<Account> accounts) {
+
+        List<Task> tasksToInsert = new List<Task>();
+        for (Account account : accounts) {
+            Task task = new Task();
+            task.Subject = 'Welcome Call';
+            task.Status = 'Not Started';
+            task.Priority = 'High';
+            task.ActivityDate = Date.today().addDays(3);
+            task.WhatId = account.Id;
+            task.OwnerId = account.OwnerId;
+            tasksToInsert.add(task);
+        }
+
+        if (!tasksToInsert.isEmpty()) {
+            insert tasksToInsert;
         }
     }
 }
