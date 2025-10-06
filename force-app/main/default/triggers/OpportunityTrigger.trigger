@@ -12,4 +12,12 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
             OpportunityTriggerHandler.createTaskOnOpportunityAmountChange(Trigger.new, Trigger.oldMap);
         }
     }
+    if (Trigger.isAfter) {
+        if (Trigger.isInsert) {
+            OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
+        }
+        if (Trigger.isUpdate) {
+            OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
+        }
+    }
 }

@@ -56,4 +56,58 @@ public with sharing class OpportunityTriggerHandler {
             }
         }
     }
+    
+    public static void updateTotalWonAmountOnAccount(List<Opportunity> opportunities, Map<Id, Opportunity> oldOpportunityMap) {
+        
+        Set<Id> accountIds = new Set<Id>();
+        for (Opportunity opportunity : opportunities) {
+            accountIds.add(opportunity.AccountId);
+        }
+
+        Map<Id, Account> accountMap = new Map<Id, Account>();
+        if (!accountIds.isEmpty()) {
+            List<Account> accounts = [
+                SELECT Id, Name, Total_Won_Revenue__c 
+                FROM Account 
+                WHERE Id IN : accountIds
+            ];
+            for (Account account : accounts) {
+                if (!accountMap.containsKey(account.Id)) {
+                    accountMap.put(account.Id, account);
+                }
+            }
+        }
+
+        List<Account> accountsToUpdate = new List<Account>();
+        Map<Id, List<Opportunity>> accountWithOpportunities = new Map<Id, List<Opportunity>>();
+        if (!accountMap.isEmpty()) {
+            for (Opportunity opp : opportunities) {
+                Account relatedAccount = accountMap.get(opp.AccountId);
+                Decimal amount = opp.Amount != null ? opp.Amount : 0;
+                if (oldOpportunityMap != null) {
+                    Opportunity oldOpp = oldOpportunityMap.get(opp.Id);
+                    if (opp.StageName != oldOpp.StageName) {
+                        if (opp.StageName == 'Closed Won') {
+                            relatedAccount.Total_Won_Revenue__c += amount;
+                            accountsToUpdate.add(relatedAccount);
+                        }
+                        else if (oldOpp.StageName == 'Closed Won' && opp.StageName != 'Closed Won') {
+                            relatedAccount.Total_Won_Revenue__c -= amount;
+                            accountsToUpdate.add(relatedAccount);
+                        }
+                    }
+                }
+                else {
+                    if (opp.StageName == 'Closed Won') {
+                        relatedAccount.Total_Won_Revenue__c += amount;
+                        accountsToUpdate.add(relatedAccount);
+                    }
+                }
+            }
+        }
+
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate;
+        }
+    }
 }
