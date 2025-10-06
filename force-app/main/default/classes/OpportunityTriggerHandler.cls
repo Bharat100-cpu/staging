@@ -67,7 +67,7 @@ public with sharing class OpportunityTriggerHandler {
         Map<Id, Account> accountMap = new Map<Id, Account>();
         if (!accountIds.isEmpty()) {
             List<Account> accounts = [
-                SELECT Id, Name, Total_Won_Revenue__c 
+                SELECT Id, Name, Total_Won_Revenue__c, Last_Deal_Closed_Date__c  
                 FROM Account 
                 WHERE Id IN : accountIds
             ];
@@ -75,6 +75,33 @@ public with sharing class OpportunityTriggerHandler {
                 if (!accountMap.containsKey(account.Id)) {
                     accountMap.put(account.Id, account);
                 }
+            }
+        }
+
+        List<AggregateResult> latestDates = [
+            SELECT AccountId, MAX(CloseDate) latestDate
+            FROM Opportunity
+            WHERE StageName = 'Closed Won' AND AccountId IN :accountIds
+            GROUP BY AccountId
+        ];
+
+        Map<Id, Date> accountIdToLatestDate = new Map<Id, Date>();
+        for (AggregateResult ar : latestDates) {
+            accountIdToLatestDate.put((Id)ar.get('AccountId'), (Date)ar.get('latestDate'));
+        }
+
+        List<Opportunity> aggregatedOpportunities = [
+            SELECT Id, Name, CloseDate, AccountId
+            FROM Opportunity
+            WHERE StageName = 'Closed Won'
+            AND AccountId IN :accountIdToLatestDate.keySet()
+            AND CloseDate IN :accountIdToLatestDate.values()
+        ];
+
+        Map<Id, Opportunity> aggregatedOppMap = new Map<Id, Opportunity>();
+        for (Opportunity opportunity : aggregatedOpportunities) {
+            if (!aggregatedOppMap.containsKey(opportunity.Id)) {
+                aggregatedOppMap.put(opportunity.Id, opportunity);
             }
         }
 
@@ -103,11 +130,21 @@ public with sharing class OpportunityTriggerHandler {
                         accountsToUpdate.add(relatedAccount);
                     }
                 }
+
+                if (relatedAccount.Last_Deal_Closed_Date__c != opp.CloseDate) {
+                    relatedAccount.Last_Deal_Closed_Date__c = opp.CloseDate;
+                }
             }
         }
 
         if (!accountsToUpdate.isEmpty()) {
             update accountsToUpdate;
         }
+    }
+
+    public static void updateLastDealClosedDateOnAccount(
+        List<Opportunity> Opportunities, Map<Id, Opportunity> oldMapOpportunities) {
+
+        
     }
 }
