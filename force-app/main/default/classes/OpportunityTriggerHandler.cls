@@ -142,9 +142,29 @@ public with sharing class OpportunityTriggerHandler {
         }
     }
 
-    public static void updateLastDealClosedDateOnAccount(
-        List<Opportunity> Opportunities, Map<Id, Opportunity> oldMapOpportunities) {
+    public static void updateProbability(
+        List<Opportunity> opportunities, Map<Id, Opportunity> oldOpportunitiesMap) {
 
-        
+        Map<String, Integer> stageProbabilityMap = new Map<String, Integer>{
+            'Prospecting' => 10,
+            'Qualification' => 25,
+            'Proposal/Price Quote' => 50,
+            'Negotiation/Review' => 75,
+            'Closed Won' => 100,
+            'Closed Lost' => 0
+        };
+
+        for (Opportunity opp : opportunities) {
+            if (oldOpportunitiesMap != null) {
+                if (oldOpportunitiesMap.containsKey(opp.Id)) {
+                    Opportunity oldOpp = oldOpportunitiesMap.get(opp.Id);
+                    if (opp.StageName != oldOpp.StageName) {
+                        opp.Probability = stageProbabilityMap.get(opp.StageName);
+                    }
+                }
+            } else {
+                opp.Probability = stageProbabilityMap.get(opp.StageName);
+            }
+        }
     }
 }

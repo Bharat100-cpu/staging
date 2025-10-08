@@ -2,11 +2,13 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
 
     if(Trigger.isBefore) {
         if(Trigger.isInsert) {
+            OpportunityTriggerHandler.updateProbability(Trigger.new, Trigger.oldMap);
             OpportunityTriggerHandler.setPriorityOnOppInsertAndUpdate(Trigger.new);
             OpportunityTriggerHandler.closeDateValidationAndProbabilityPrediction(Trigger.new);
             OpportunityTriggerHandler.createTaskOnOpportunityAmountChange(Trigger.new, Trigger.oldMap);
         }
         if(Trigger.isUpdate) {
+            OpportunityTriggerHandler.updateProbability(Trigger.new, Trigger.oldMap);
             OpportunityTriggerHandler.setPriorityOnOppInsertAndUpdate(Trigger.new);
             OpportunityTriggerHandler.closeDateValidationAndProbabilityPrediction(Trigger.new);
             OpportunityTriggerHandler.createTaskOnOpportunityAmountChange(Trigger.new, Trigger.oldMap);
