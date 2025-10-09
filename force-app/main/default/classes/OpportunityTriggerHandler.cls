@@ -167,4 +167,33 @@ public with sharing class OpportunityTriggerHandler {
             }
         }
     }
+
+    public static void updateTotalOppCountOnAccount(List<Opportunity> newOpportunities) {
+
+        Set<Id> accountIds = new Set<Id>();
+        for (Opportunity opp : newOpportunities) {
+            if (opp.AccountId != null) {
+                accountIds.add(opp.AccountId);
+            }
+        }
+
+        List<AggregateResult> result = [
+            SELECT COUNT(Id) opportunities, AccountId 
+            FROM Opportunity 
+            WHERE AccountId IN : accountIds 
+            GROUP BY AccountId
+        ];
+
+        List<Account> accountsToUpdate = new List<Account>();
+        for (AggregateResult ar : result) {
+            Account acc = new Account();
+            acc.Id = (String)ar.get('AccountId');
+            acc.Total_Opportunities__c = (Integer)ar.get('opportunities');
+            accountsToUpdate.add(acc);
+        }
+
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate;
+        }
+    }
 }

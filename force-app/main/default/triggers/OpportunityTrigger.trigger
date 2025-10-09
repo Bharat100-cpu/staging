@@ -16,10 +16,15 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
     }
     if (Trigger.isAfter) {
         if (Trigger.isInsert) {
+            OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
             OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
         }
         if (Trigger.isUpdate) {
+            OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
             OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
+        }
+        if (Trigger.isDelete) {
+            OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
         }
     }
 }
