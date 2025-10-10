@@ -29,6 +29,7 @@ public with sharing class OpportunityTriggerHandler {
                 newTask.Subject = 'Follow up on High Value Opportunity';
                 newTask.ActivityDate = Date.today().addDays(7);
                 newTask.Status = 'Not Started';
+                newTask.WhatId = opp.Id;
                 tasksToInsert.add(newTask);
             }
         }
@@ -194,6 +195,45 @@ public with sharing class OpportunityTriggerHandler {
 
         if (!accountsToUpdate.isEmpty()) {
             update accountsToUpdate;
+        }
+    }
+
+    public static void createTaskForClosedLostOpportunity(
+        Map<Id, Opportunity> newOpportunitiesMap, Map<Id, Opportunity> oldOpportunitiesMap) {
+        List<Task> tasksToInsert = new List<Task>();
+
+        List<AggregateResult> results = [
+            SELECT COUNT(Id) totalTasks, WhatId 
+            FROM Task 
+            WHERE WhatId IN : newOpportunitiesMap.keySet() 
+            GROUP BY WhatId
+        ];
+
+        Set<Id> opportunitiesWithTask = new Set<Id>();
+        for (AggregateResult ar : results) {
+            Id whatId = (Id)ar.get('WhatId');
+            if (String.isNotBlank(whatId)) {
+                opportunitiesWithTask.add(whatId);
+            }
+        }
+
+        for (Opportunity newOpp : newOpportunitiesMap.values()) {
+            if (!opportunitiesWithTask.contains(newOpp.Id)) {
+                Opportunity oldOpp = oldOpportunitiesMap.get(newOpp.Id);
+                if (newOpp.StageName == 'Closed Lost' && newOpp.StageName != oldOpp.StageName) {
+                    Task taskObj = new Task();
+                    taskObj.Subject = 'Follow up with lost deal';
+                    taskObj.WhatId = newOpp.Id;
+                    taskObj.OwnerId = newOpp.OwnerId;
+                    taskObj.ActivityDate = Date.today().addDays(7);
+                    taskObj.Status = 'Not Started';
+                    tasksToInsert.add(taskObj);
+                }
+            }
+        }
+
+        if (!tasksToInsert.isEmpty()) {
+            insert tasksToInsert;
         }
     }
 }

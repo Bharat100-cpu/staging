@@ -21,6 +21,7 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
         }
         if (Trigger.isUpdate) {
             OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
+            OpportunityTriggerHandler.createTaskForClosedLostOpportunity(Trigger.newMap, Trigger.oldMap);
             OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
         }
         if (Trigger.isDelete) {
