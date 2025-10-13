@@ -236,4 +236,57 @@ public with sharing class OpportunityTriggerHandler {
             insert tasksToInsert;
         }
     }
+
+    public static void createContractOnOpportunityClose(List<Opportunity> newOpportunities, Map<Id, Opportunity> oldOppMap) {
+
+        Map<Id, Opportunity> validOpportunitiesMap =  new Map<Id, Opportunity>();
+        Map<Id, List<OpportunityLineItem>> opportunityWithLineItems = new Map<Id, List<OpportunityLineItem>>();
+        List<Contract> contractsToInsert = new List<Contract>();
+        List<Asset> assetsToInsert = new List<Asset>();
+
+        for (Opportunity opp : newOpportunities) {
+            Opportunity oldOpp = oldOppMap.get(opp.Id);
+            if (opp.StageName == 'Closed Won' && opp.StageName != oldOpp.StageName) {
+                if (!validOpportunitiesMap.containsKey(opp.Id)) {
+                    validOpportunitiesMap.put(opp.Id, opp);
+
+                    Contract contract = new Contract();
+                    contract.AccountId = opp.AccountId;
+                    contract.Status = 'Draft';
+                    contract.ContractTerm = 12;
+                    contract.StartDate = opp.CloseDate;
+                    contractsToInsert.add(contract);
+                }
+            }
+        }
+
+        List<OpportunityLineItem> oppLineItems = [
+            SELECT Id, OpportunityId, Product2Id, Quantity, UnitPrice, TotalPrice, ServiceDate, Description, Name 
+            FROM OpportunityLineItem
+            WHERE OpportunityId IN : validOpportunitiesMap.keySet()
+        ];
+
+        if (!oppLineItems.isEmpty()) {
+            for (OpportunityLineItem oli : oppLineItems) {
+                Opportunity opportunity = validOpportunitiesMap.get(oli.OpportunityId);
+                Asset assetObj = new Asset();
+                assetObj.AccountId = opportunity.AccountId;
+                assetObj.Product2Id = oli.Product2Id;
+                assetObj.Quantity = oli.Quantity;
+                assetObj.Status = '	In Approval Process';
+                assetObj.PurchaseDate = oli.ServiceDate;
+                assetObj.OwnerId = opportunity.OwnerId;
+                assetObj.Name = oli.Name;
+                assetsToInsert.add(assetObj);
+            }
+        }
+
+        if (!contractsToInsert.isEmpty()) {
+            insert contractsToInsert;
+        }
+
+        if(!assetsToInsert.isEmpty()) {
+            insert assetsToInsert;
+        }
+    }
 }
