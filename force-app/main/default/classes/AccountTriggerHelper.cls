@@ -58,4 +58,25 @@ public with sharing class AccountTriggerHelper {
             insert tasksToInsert;
         }
     }
+
+    public static void setRating(List<Account> newAccounts, Map<Id, Account> oldAccounts) {
+
+        for (Account account : newAccounts) {
+            if (!oldAccounts.isEmpty()) {
+                Account oldAccount = oldAccounts.get(account.Id);
+                if (account.AnnualRevenue == oldAccount.AnnualRevenue) {
+                    continue;
+                }
+            }
+            if (account.AnnualRevenue > 1000000) {
+                account.Rating = 'Hot';
+            } else if (account.AnnualRevenue > 500000 && account.AnnualRevenue < 999999) {
+                account.Rating = 'Warm';
+            } else if (account.AnnualRevenue < 500000 && account.AnnualRevenue != 0) {
+                account.Rating = 'Cold';
+            } else if (account.AnnualRevenue == null || account.AnnualRevenue == 0) {
+                account.Rating = '';
+            }
+        }
+    }
 }

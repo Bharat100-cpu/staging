@@ -3,6 +3,10 @@ trigger AccountTrigger on Account (
 
     if (Trigger.isBefore) {
         if (Trigger.isInsert) {
+            AccountTriggerHelper.setRating(Trigger.new, Trigger.oldMap);
+        }
+        if (Trigger.isUpdate) {
+            AccountTriggerHelper.setRating(Trigger.new, Trigger.oldMap);
         }
     }
     if(Trigger.isAfter) {
