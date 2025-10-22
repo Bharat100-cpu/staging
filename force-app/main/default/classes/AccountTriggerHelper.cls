@@ -79,4 +79,30 @@ public with sharing class AccountTriggerHelper {
             }
         }
     }
+
+    public static void accountValidationToDelete(List<Account> accounts) {
+
+        Set<Id> accountIds = new Set<Id>();
+        for (Account account : accounts) {
+            accountIds.add(account.Id);
+        }
+
+        List<AggregateResult> result = [
+            SELECT COUNT(Id) totalOpps, AccountId  
+            FROM Opportunity 
+            WHERE AccountId IN : accountIds AND StageName != 'Closed'
+            GROUP BY AccountId
+        ];
+
+        Map<Id, Integer> accountsWithOppCount = new Map<Id, Integer>();
+        for (AggregateResult ag : result) {
+            accountsWithOppCount.put((Id)ag.get('AccountId'), (Integer)ag.get('totalOpps'));
+        }
+
+        for (Account accountObj : accounts) {
+            if (accountsWithOppCount.containsKey(accountObj.Id) && accountsWithOppCount.get(accountObj.Id) > 0) {
+                accountObj.addError('Cannot delete Account with related Opportunities. Please close or delete all Opportunities first.');
+            }
+        }
+    }
 }

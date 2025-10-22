@@ -8,6 +8,9 @@ trigger AccountTrigger on Account (
         if (Trigger.isUpdate) {
             AccountTriggerHelper.setRating(Trigger.new, Trigger.oldMap);
         }
+        if (Trigger.isDelete) {
+            AccountTriggerHelper.accountValidationToDelete(Trigger.old);
+        }
     }
     if(Trigger.isAfter) {
         if(Trigger.isInsert) {
