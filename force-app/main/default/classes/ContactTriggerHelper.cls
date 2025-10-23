@@ -126,4 +126,84 @@ public with sharing class ContactTriggerHelper {
             update accountsToUpdate;
         }
     }
+
+    public static void updatePrimaryContactDetailsOnAccount(List<Contact> newContacts, Map<Id, Contact> oldContacts) {
+        
+        Set<Id> accountIds = new Set<Id>();
+        Map<Id, Contact> newPrimaryContactsByAccount = new Map<Id, Contact>();
+        Map<Id, Account> accountsToUpdate = new Map<Id, Account>();
+        
+        // Collect account IDs and new primary contacts
+        for (Contact contact : newContacts) {
+            if (contact.AccountId == null) continue;
+            
+            Contact oldContact = oldContacts?.get(contact.Id);
+            Boolean wasntPrimary = oldContact == null || !oldContact.Primary_Contact__c;
+            Boolean isNowPrimary = contact.Primary_Contact__c;
+            
+            // If becoming primary or changing primary contact details
+            if (isNowPrimary && wasntPrimary) {
+                accountIds.add(contact.AccountId);
+                newPrimaryContactsByAccount.put(contact.AccountId, contact);
+            }
+            // If being unchecked as primary, clear account fields
+            else if (!isNowPrimary && oldContact != null && oldContact.Primary_Contact__c) {
+                accountsToUpdate.put(contact.AccountId, new Account(
+                    Id = contact.AccountId,
+                    Phone = '',
+                    Primary_Contact_Email__c = ''
+                ));
+            }
+        }
+        
+        if (accountIds.isEmpty() && accountsToUpdate.isEmpty()) {
+            return; // Early exit if nothing to process
+        }
+        
+        // Query existing primary contacts for affected accounts
+        List<Contact> contactsToUpdate = new List<Contact>();
+        if (!accountIds.isEmpty()) {
+            for (Contact existingContact : [
+                SELECT Id, AccountId, Primary_Contact__c
+                FROM Contact 
+                WHERE AccountId IN :accountIds 
+                AND Primary_Contact__c = true
+                AND Id NOT IN :newContacts
+            ]) {
+                // Uncheck old primary contacts
+                existingContact.Primary_Contact__c = false;
+                contactsToUpdate.add(existingContact);
+                
+                // Update account with new primary contact details
+                Contact newPrimary = newPrimaryContactsByAccount.get(existingContact.AccountId);
+                if (newPrimary != null) {
+                    accountsToUpdate.put(newPrimary.AccountId, new Account(
+                        Id = newPrimary.AccountId,
+                        Phone = newPrimary.Phone,
+                        Primary_Contact_Email__c = newPrimary.Email
+                    ));
+                }
+            }
+            
+            // Handle accounts with no existing primary contact
+            for (Id accountId : accountIds) {
+                if (!accountsToUpdate.containsKey(accountId)) {
+                    Contact newPrimary = newPrimaryContactsByAccount.get(accountId);
+                    accountsToUpdate.put(accountId, new Account(
+                        Id = accountId,
+                        Phone = newPrimary.Phone,
+                        Primary_Contact_Email__c = newPrimary.Email
+                    ));
+                }
+            }
+        }
+        
+        // Perform DML operations
+        if (!contactsToUpdate.isEmpty()) {
+            update contactsToUpdate;
+        }
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate.values();
+        }
+    }
 }

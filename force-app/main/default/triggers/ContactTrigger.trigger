@@ -15,6 +15,7 @@ trigger ContactTrigger on Contact (before insert, before update, before delete, 
         }
         if(Trigger.isUpdate) {
             ContactTriggerHelper.calculateHealthScore(Trigger.new, Trigger.oldMap);
+            ContactTriggerHelper.updatePrimaryContactDetailsOnAccount(Trigger.new, Trigger.oldMap);
         }
     }
 }
