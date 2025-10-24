@@ -18,12 +18,14 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
         if (Trigger.isInsert) {
             OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
             OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
+            OpportunityTriggerHandler.createOpportunityTeam(Trigger.newMap, Trigger.oldMap);
         }
         if (Trigger.isUpdate) {
             OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
             OpportunityTriggerHandler.createTaskForClosedLostOpportunity(Trigger.newMap, Trigger.oldMap);
             OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
             OpportunityTriggerHandler.createContractOnOpportunityClose(Trigger.new, Trigger.oldMap);
+            OpportunityTriggerHandler.createOpportunityTeam(Trigger.newMap, Trigger.oldMap);
         }
         if (Trigger.isDelete) {
             OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
