@@ -1,0 +1,72 @@
+<template>
+    <div class="slds-box slds-theme_default">
+        <h2 class="slds-text-heading_small slds-m-bottom_medium">Create New Contact</h2>
+        
+        <div class="slds-form-element slds-m-bottom_small">
+            <label class="slds-form-element__label">First Name</label>
+            <div class="slds-form-element__control">
+                <input 
+                    type="text" 
+                    class="slds-input"
+                    value={firstName}
+                    onchange={handleFirstNameChange}
+                    placeholder="Enter first name"
+                />
+            </div>
+        </div>
+
+        <div class="slds-form-element slds-m-bottom_small">
+            <label class="slds-form-element__label">Last Name</label>
+            <div class="slds-form-element__control">
+                <input 
+                    type="text" 
+                    class="slds-input"
+                    value={lastName}
+                    onchange={handleLastNameChange}
+                    placeholder="Enter last name"
+                />
+            </div>
+        </div>
+
+        <div class="slds-form-element slds-m-bottom_small">
+            <label class="slds-form-element__label">Email</label>
+            <div class="slds-form-element__control">
+                <input 
+                    type="email" 
+                    class="slds-input"
+                    value={email}
+                    onchange={handleEmailChange}
+                    placeholder="Enter email"
+                />
+            </div>
+        </div>
+
+        <div class="slds-form-element slds-m-bottom_small">
+            <label class="slds-form-element__label">Phone</label>
+            <div class="slds-form-element__control">
+                <input 
+                    type="tel" 
+                    class="slds-input"
+                    value={phone}
+                    onchange={handlePhoneChange}
+                    placeholder="Enter phone number"
+                />
+            </div>
+        </div>
+
+        <div class="slds-m-top_small">
+            <lightning-button 
+                label={saveButtonLabel}
+                variant="brand" 
+                onclick={handleSave}
+                class="slds-m-right_small"
+                disabled={isLoading}
+            ></lightning-button>
+            <lightning-button 
+                label="Reset" 
+                variant="neutral" 
+                onclick={handleReset}
+            ></lightning-button>
+        </div>
+    </div>
+</template>
