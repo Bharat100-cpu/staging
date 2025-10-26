@@ -22,7 +22,7 @@ public with sharing class AccountTriggerHelper {
             if(result.containsKey(acc.Id) && !result.get(acc.Id)) {
                 Contact con = new Contact();
                 con.LastName = acc.Name;
-                con.Email = acc.Name + '@example.com';
+                con.Email = 'test@example.com';
                 con.Role__c = 'Primary';
                 con.Primary_Role__c = true;
                 con.AccountId = acc.Id;
@@ -63,10 +63,12 @@ public with sharing class AccountTriggerHelper {
 
         for (Account account : newAccounts) {
             if (account.AnnualRevenue != null) {
-                if (!oldAccounts.isEmpty() && oldAccounts.containsKey(account.Id)) {
-                    Account oldAccount = oldAccounts.get(account.Id);
-                    if (account.AnnualRevenue == oldAccount.AnnualRevenue) {
-                        continue;
+                if (oldAccounts != null) {
+                    if (oldAccounts.containsKey(account.Id)) {
+                        Account oldAccount = oldAccounts.get(account.Id);
+                        if (account.AnnualRevenue == oldAccount.AnnualRevenue) {
+                            continue;
+                        }
                     }
                 }
                 if (account.AnnualRevenue > 1000000) {
