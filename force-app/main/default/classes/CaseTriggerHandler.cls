@@ -1,6 +1,11 @@
 public with sharing class CaseTriggerHandler {
     
     public static void createFollowUpTask(List<Case> cases) {
+        // Check object-level CRUD: user must have create access on Task
+        if (!Schema.sObjectType.Task.isCreateable()) {
+            // No permission to create Task records, safely exit
+            return;
+        }
 
         List<Task> tasksToInsert = new List<Task>();
         for (Case caseObj : cases) {
@@ -15,8 +20,17 @@ public with sharing class CaseTriggerHandler {
             tasksToInsert.add(task);
         }
 
-        if(!tasksToInsert.isEmpty()) {
-            insert tasksToInsert;
+        if (!tasksToInsert.isEmpty()) {
+            // Enforce field-level security before DML
+            SObjectAccessDecision accessDecision = Security.stripInaccessible(
+                AccessType.CREATABLE,
+                tasksToInsert
+            );
+            List<Task> insertableTasks = (List<Task>) accessDecision.getRecords();
+
+            if (!insertableTasks.isEmpty()) {
+                insert insertableTasks;
+            }
         }
     }
 }

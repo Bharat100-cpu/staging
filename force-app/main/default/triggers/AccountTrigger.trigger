@@ -15,7 +15,7 @@ trigger AccountTrigger on Account (
     if(Trigger.isAfter) {
         if(Trigger.isInsert) {
             AccountTriggerHelper.insertTask(Trigger.new);
-            AccountTriggerHelper.createPrimaryContactForIndustryAccount(trigger.newMap);
+            AccountTriggerHelper.createPrimaryContactForIndustryAccount(Trigger.newMap);
         }
     }
 }

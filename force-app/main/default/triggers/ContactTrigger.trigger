@@ -2,20 +2,20 @@ trigger ContactTrigger on Contact (before insert, before update, before delete, 
 
     if(Trigger.isBefore) {
         if(Trigger.isInsert) {
-            ContactTriggerHelper.validateContacts(Trigger.new, Trigger.oldMap);
+            ContactEmailValidator.validateContacts(Trigger.new, Trigger.oldMap);
         }
         if(Trigger.isUpdate) {
-            ContactTriggerHelper.validateContacts(Trigger.new, Trigger.oldMap);
+            ContactEmailValidator.validateContacts(Trigger.new, Trigger.oldMap);
         }
     }
 
     if(Trigger.isAfter) {
         if (Trigger.isInsert) {
-            ContactTriggerHelper.calculateHealthScore(Trigger.new, Trigger.oldMap);
+            ContactHealthScoreCalculator.calculateHealthScore(Trigger.new, Trigger.oldMap);
         }
         if(Trigger.isUpdate) {
-            ContactTriggerHelper.calculateHealthScore(Trigger.new, Trigger.oldMap);
-            ContactTriggerHelper.updatePrimaryContactDetailsOnAccount(Trigger.new, Trigger.oldMap);
+            ContactHealthScoreCalculator.calculateHealthScore(Trigger.new, Trigger.oldMap);
+            ContactPrimarySyncManager.updatePrimaryContactDetailsOnAccount(Trigger.new, Trigger.oldMap);
         }
     }
 }
