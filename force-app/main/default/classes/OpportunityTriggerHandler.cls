@@ -1,5 +1,4 @@
 public with sharing class OpportunityTriggerHandler {
-    
     public static void setPriorityOnOppInsertAndUpdate(List<Opportunity> newOpportunities) {
         OpportunityPriorityHandler.setPriorityOnOppInsertAndUpdate(newOpportunities);
     }
@@ -39,5 +38,9 @@ public with sharing class OpportunityTriggerHandler {
         Map<Id, Opportunity> newOpportunityMap, 
         Map<Id, Opportunity> oldOpportunities) {
         OpportunityTeamHandler.createOpportunityTeam(newOpportunityMap, oldOpportunities);
+    }
+    
+    public static void handleStageBasedTasks(List<Opportunity> newOpportunities, Map<Id, Opportunity> oldOpportunitiesMap) {
+        OpportunityStageTaskHandler.handleStageChanges(newOpportunities, oldOpportunitiesMap);
     }
 }

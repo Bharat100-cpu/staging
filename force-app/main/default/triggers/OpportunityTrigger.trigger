@@ -1,5 +1,4 @@
 trigger OpportunityTrigger on Opportunity (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
-
     if(Trigger.isBefore) {
         if(Trigger.isInsert) {
             OpportunityTriggerHandler.updateProbability(Trigger.new, Trigger.oldMap);
@@ -26,6 +25,7 @@ trigger OpportunityTrigger on Opportunity (before insert, before update, before 
             OpportunityTriggerHandler.updateTotalWonAmountOnAccount(Trigger.new, Trigger.oldMap);
             OpportunityTriggerHandler.createContractOnOpportunityClose(Trigger.new, Trigger.oldMap);
             OpportunityTriggerHandler.createOpportunityTeam(Trigger.newMap, Trigger.oldMap);
+            OpportunityTriggerHandler.handleStageBasedTasks(Trigger.new, Trigger.oldMap);
         }
         if (Trigger.isDelete) {
             OpportunityTriggerHandler.updateTotalOppCountOnAccount(Trigger.new);
