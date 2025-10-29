@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Queue xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Unassigned Leads</fullName>
+    <doesSendEmailToMembers>false</doesSendEmailToMembers>
+    <email/>
+    <name>Unassigned Leads</name>
+    <queueMembers>
+        <publicGroups/>
+        <roleAndSubordinates/>
+        <roles/>
+        <users/>
+    </queueMembers>
+    <queueSobject>
+        <sobjectType>Lead</sobjectType>
+        <queueFields></queueFields>
+    </queueSobject>
+</Queue>
