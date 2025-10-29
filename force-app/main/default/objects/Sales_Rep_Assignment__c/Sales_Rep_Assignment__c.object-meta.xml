@@ -9,7 +9,65 @@
     <enableHistory>false</enableHistory>
     <enableReports>true</enableReports>
     <enableSearch>true</enableSearch>
-    <fields/>
+    <fields>
+        <fullName>Current_Lead_Count__c</fullName>
+        <externalId>false</externalId>
+        <label>Current Lead Count</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Is_Active__c</fullName>
+        <defaultValue>false</defaultValue>
+        <externalId>false</externalId>
+        <label>Is Active</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Last_Assignment_DateTime__c</fullName>
+        <externalId>false</externalId>
+        <label>Last Assignment DateTime</label>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Lead_Source_Specialty__c</fullName>
+        <externalId>false</externalId>
+        <label>Lead Source Specialty</label>
+        <length>255</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Max_Lead_Capacity__c</fullName>
+        <externalId>false</externalId>
+        <label>Max Lead Capacity</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Territory__c</fullName>
+        <externalId>false</externalId>
+        <label>Territory</label>
+        <length>255</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>User__c</fullName>
+        <externalId>false</externalId>
+        <label>User</label>
+        <referenceTo>User</referenceTo>
+        <relationshipName>Rep_Assignments</relationshipName>
+        <type>Lookup</type>
+    </fields>
     <label>Sales Rep Assignment</label>
     <nameField>
         <displayFormat>REP-{00000}</displayFormat>

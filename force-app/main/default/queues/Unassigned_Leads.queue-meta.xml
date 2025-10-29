@@ -12,6 +12,10 @@
     </queueMembers>
     <queueSobject>
         <sobjectType>Lead</sobjectType>
-        <queueFields></queueFields>
+        <queueFields>
+            <field>OwnerId</field>
+            <field>Status</field>
+            <field>LeadSource</field>
+        </queueFields>
     </queueSobject>
 </Queue>

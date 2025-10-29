@@ -3,7 +3,6 @@
     <fullName>Assignment_Notes__c</fullName>
     <description>Explains why and how this lead was assigned (rep, territory, specialty, capacity)</description>
     <externalId>false</externalId>
-    <fieldManageability>DeveloperControlled</fieldManageability>
     <inlineHelpText>Auto-populated by assignment trigger</inlineHelpText>
     <label>Assignment Notes</label>
     <length>255</length>

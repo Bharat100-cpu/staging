@@ -216,30 +216,38 @@ public with sharing class LeadAssignmentHelper {
     public static void commitRepUpdates() {
         if (repIncrementMap.isEmpty() && repLastAssignedMap.isEmpty()) return;
 
+        // Create a list of IDs to query for the records we need to update
+        Set<Id> repIds = repIncrementMap.keySet();
+        if (repIds.isEmpty()) return;
+
+        // Query the records we need to update
         List<Sales_Rep_Assignment__c> toUpdate = new List<Sales_Rep_Assignment__c>();
-        for (Id repId : repIncrementMap.keySet()) {
+        Map<Id, Sales_Rep_Assignment__c> fresh = new Map<Id, Sales_Rep_Assignment__c>([
+            SELECT Id, Current_Lead_Count__c
+            FROM Sales_Rep_Assignment__c
+            WHERE Id IN :repIds
+        ]);
+
+        // Build the update list with incremented counts
+        for (Id repId : repIds) {
             Integer inc = repIncrementMap.get(repId);
             Datetime ts = repLastAssignedMap.get(repId);
             Sales_Rep_Assignment__c row = new Sales_Rep_Assignment__c(
                 Id = repId,
-                Current_Lead_Count__c = null,
                 Last_Assignment_DateTime__c = ts
             );
+
+            // Get the current count and increment it
+            Sales_Rep_Assignment__c cur = fresh.get(repId);
+            if (cur != null) {
+                Integer baseCount = cur.Current_Lead_Count__c == null ? 0 : Integer.valueOf(cur.Current_Lead_Count__c);
+                row.Current_Lead_Count__c = baseCount + (inc == null ? 0 : inc);
+            }
             toUpdate.add(row);
         }
-        // Need current counts to add increments safely; query partial and add
+
+        // Update the records if we have any to update
         if (!toUpdate.isEmpty()) {
-            Map<Id, Sales_Rep_Assignment__c> fresh = new Map<Id, Sales_Rep_Assignment__c>([
-                SELECT Id, Current_Lead_Count__c
-                FROM Sales_Rep_Assignment__c
-                WHERE Id IN :repIncrementMap.keySet()
-            ]);
-            for (Sales_Rep_Assignment__c upd : toUpdate) {
-                Sales_Rep_Assignment__c cur = fresh.get(upd.Id);
-                Integer baseCount = cur.Current_Lead_Count__c == null ? 0 : Integer.valueOf(cur.Current_Lead_Count__c);
-                Integer inc = repIncrementMap.get(upd.Id);
-                upd.Current_Lead_Count__c = baseCount + (inc == null ? 0 : inc);
-            }
             update toUpdate;
         }
 
